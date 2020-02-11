@@ -1,5 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import { Routes } from './router/router';
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -16,10 +17,7 @@ app.use(function (req, res, next) {
   next();
 });
 
-
-router.get('', (req, res) => {
-  res.status(200).send('Hello world');
-});
+const routes = new Routes(router);
 
 app.use(router);
 
