@@ -28,7 +28,7 @@ export class RoutingError extends Error {
   message: string;
   name = 'Routing error';
   layer: Layer = 'router';
-  public constructor(message: string) { super(message); }
+  public constructor(message: string, status = 404) { super(message); }
 }
 
 export class AuthenticationError extends Error {
