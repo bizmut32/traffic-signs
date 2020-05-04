@@ -1,16 +1,10 @@
-import { Success, Response } from '../model/exceptions.model';
+import { Success, Response, ServerError } from '../model/response.model';
 import { ClassificationResult } from '../model/common-interface';
 import { readImageInBase64 } from '../model/image-reader.model';
+import { PythonProcess } from '../model/python-process.model';
 const path = require('path');
 
 export class Controller {
-  hello (name: String): Promise<Response> {
-    return new Promise (async (resolve) => {
-      setTimeout(() => {
-        resolve (new Success(`Hello ${name}!`));
-      }, 1000);
-    });
-  }
 
   classifyImage(data: { image: string }): Promise<Response<ClassificationResult>> {
     return new Promise ((resolve, reject) => {
@@ -35,6 +29,16 @@ export class Controller {
 
       resolve(new Success({image: {base64: image}, guesses, executionTime: 123}));
     });
+  }
+
+  async hello(name: string): Promise<Response<string>> {
+    const pythonProcess = new PythonProcess('hello-world.py');
+    try {
+      const result = await pythonProcess.start(name);
+      return Promise.resolve(new Success(result));
+    } catch (err) {
+      return Promise.reject(new ServerError(err));
+    }
   }
 
   private sleep(ms: number) {

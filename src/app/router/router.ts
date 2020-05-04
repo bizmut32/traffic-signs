@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { RoutingError, Response as ResponseResult, Success, Error, ServerError } from '../model/exceptions.model';
+import { RoutingError, Response as ResponseResult, Success, Error, ServerError } from '../model/response.model';
 import { Controller } from '../controller/controller';
 export class Routes {
   router: Router;
