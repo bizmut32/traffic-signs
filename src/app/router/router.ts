@@ -18,11 +18,6 @@ export class Routes {
       return Promise.resolve(new Success('Hello world!'));
     });
 
-    this.get('/hello/:name', (req: Request) => {
-      const controller = new Controller();
-      return controller.hello(req.params.name);
-    });
-
     this.post('/image', (req: Request) => {
       const controller = new Controller();
       this.require(req.body, 'image');
