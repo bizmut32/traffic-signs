@@ -64,7 +64,6 @@ export class ZeroRPCProcess implements Process {
             }, 12_000);
 
             client.invoke('detect', ...args, function(error: any, res: any, more: any) {
-                console.log(res);
                 if (error) reject(error);
                 else resolve(res);
             });

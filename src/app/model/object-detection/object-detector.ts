@@ -41,7 +41,6 @@ export class KerasObjectDetector implements ObjectDetector {
 
     processImage(path: string): Detections {
         const process: Process = new ZeroRPCProcess(this.pythonScript);
-        console.log(path);
         const detection = process.start(path);
         return detection
             .then(result => this.resultToBoundingBoxes(result));
