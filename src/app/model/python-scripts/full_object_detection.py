@@ -18,16 +18,31 @@ classifier.load(modelsPath)
 objectDetector = ObjectDetector()
 objectDetector.load(modelsPath)
 
+
+def cropImage(img):
+    w, h = img.shape[1], img.shape[0]
+    wh = min(w, h)
+    x1, y1 = (w - wh) / 2, (h - wh) / 2
+    x2, y2 = x1 + w, y1 + h
+    x1, x2, y1, y2 = int(x1), int(x2), int(y1), int(y2)
+    return img[y1:y2, x1:x2], x1, y1
+
+
 def fullPrediction(image):
-    image = image / 255.0
+    image, dx, dy = cropImage(image)
     results = objectDetector.predict(image)
-    bboxes = extendBoundingBoxes(image, results)
+    if (len(results) == 0):
+        return [], [], []
+    bboxes, certainties = extendBoundingBoxes(image, results)
     images = prepareImages(image, bboxes)
     predictions = []
     for i in range(0, len(results)):
         pred = classifier.predict([images[0][i], images[1][i], images[2][i], images[3][i], images[4][i]])
         predictions.append(pred)
-    return bboxes, predictions
+
+    bboxes[..., 0:2] += dx
+    bboxes[..., 2:] += dy
+    return bboxes, predictions, certainties
     
 def extendBoundingBoxes(image, bboxes, value = .1):
     h, w = image.shape[:2]
@@ -41,7 +56,7 @@ def extendBoundingBoxes(image, bboxes, value = .1):
         y1 = max(0, y1 - dy)
         y2 = min(h, y2 + dy)
         results.append([x1, x2, y1, y2])
-    return np.array(results)
+    return np.array(results), bboxes[..., 0]
 
 def prepareImages(image, bboxes):
     imgs = []
@@ -58,5 +73,8 @@ def prepareImages(image, bboxes):
     return preprocessed
 
 def loadImage(path):
-    im = cv2.imread(path)
-    return im.astype('float32')
+    im = cv2.imread(path, cv2.IMREAD_COLOR)
+    im = cv2.cvtColor(im,cv2.COLOR_BGR2RGB)
+    im = im.astype('float32')
+    im = im / 255.0
+    return im

@@ -11,8 +11,8 @@ def myconverter(obj):
     elif isinstance(obj, datetime.datetime):
         return obj.__str__()
 
-#imagePath = sys.argv[1]
-imagePath = 'src/assets/testimage.png'
+imagePath = sys.argv[1]
+#imagePath = 'src/assets/testimage.png'
 img = loadImage(imagePath)
 bboxes, labels = fullPrediction(img)
 result = { 'bounding_boxes': bboxes, 'classifications': labels }

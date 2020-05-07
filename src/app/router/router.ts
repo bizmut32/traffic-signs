@@ -24,7 +24,7 @@ export class Routes {
       return controller.classifyImage({image: req.body.image});
     });
 
-    this.get('/image/random', (req: Request) => {
+    this.post('/image/random', (req: Request) => {
       const controller = new Controller();
       return controller.classifyRandomImage();
     });

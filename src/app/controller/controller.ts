@@ -1,35 +1,40 @@
 import { Success, Response, ServerError } from '../model/response.model';
-import { ClassificationResult } from '../model/common-interface.model';
 import { PythonProcess } from '../helpers/python-process';
-import { withTimeMeasure, Path } from '../helpers/util';
+import { withTimeMeasure, Path, TimeMeasureResult } from '../helpers/util';
 import { ImageProcessor } from '../helpers/image-processor';
 import { KerasObjectDetector, ObjectDetector } from '../model/object-detection/object-detector';
 import { Detection } from '../model/object-detection/object-detection.model';
+import { ImageDetection } from '../model/common-interface.model';
 
 export class Controller {
 
-  async classifyImage(data: { image: string }): Promise<Response<Detection[]>> {
+  async classifyImage(data: { image: string }): Promise<Response<ImageDetection>> {
     const image = data.image;
     const pythonScript = Path.pathFromRelativePath('app/model/python-scripts/runnable.py');
-    const objectDetector: ObjectDetector = new KerasObjectDetector(pythonScript);
-    const result = await withTimeMeasure(() => objectDetector.processImageBase64(image));
-    return Promise.resolve(new Success(result));
+    try {
+      const objectDetector: ObjectDetector = new KerasObjectDetector(pythonScript);
+      const result: TimeMeasureResult<Detection[]> = await withTimeMeasure(() => objectDetector.processImageBase64(image));
+      const detectionResult: ImageDetection = { objects: result.result, executionTime: result.time, image: {base64: image} };
+      return Promise.resolve(new Success(detectionResult));
+    }
+    catch ( err ) {
+      return Promise.reject(new ServerError(err));
+    }
   }
 
-  classifyRandomImage(): Promise<Response<ClassificationResult>> {
-    return new Promise (async (resolve, reject) => {
-      const guesses: number[] = [];
-      for (let i = 0; i < 43; ++i)
-        guesses.push(Math.random() * 0.8);
-      guesses[1] = 0.98345;
-
-      const image = await ImageProcessor.readImageInBase64('assets/40.jpg');
-      await this.sleep(1000);
-
-      resolve(new Success({image: {base64: image}, guesses, executionTime: 123}));
-    });
+  async classifyRandomImage(): Promise<Response<ImageDetection | null>> {
+    const image = await ImageProcessor.readImageInBase64('assets/testimage2.png');
+    const pythonScript = Path.pathFromRelativePath('app/model/python-scripts/runnable.py');
+    try {
+      const objectDetector: ObjectDetector = new KerasObjectDetector(pythonScript);
+      const result: TimeMeasureResult<Detection[]> = await withTimeMeasure(() => objectDetector.processImageBase64(image));
+      const detectionResult: ImageDetection = { objects: result.result, executionTime: result.time, image: {base64: image} };
+      return Promise.resolve(new Success(detectionResult));
+    }
+    catch ( err ) {
+      return Promise.reject(new ServerError(err));
+    }
   }
-
 
   private sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));

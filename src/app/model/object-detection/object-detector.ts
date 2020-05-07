@@ -1,6 +1,6 @@
 import { Detection, numbersToBoundingBox } from './object-detection.model';
 import { ImageProcessor } from '../../helpers/image-processor';
-import { Process, PythonProcess } from '../../helpers/python-process';
+import { Process, PythonProcess, ZeroRPCProcess } from '../../helpers/python-process';
 import { ClassificationOutput, GRTBSClassification } from './classification.model';
 
 type Detections = Promise<Detection[]>;
@@ -28,7 +28,7 @@ export class KerasObjectDetector implements ObjectDetector {
 
     constructor (private pythonScript: string) {}
 
-    async processImageBase64(base64: string): Detections {
+    processImageBase64(base64: string): Detections {
         return new Promise(resolve => {
             this.generateFilePath();
             ImageProcessor.base64ToPng(base64, this.imagePath ?? '').then(path => {
@@ -40,7 +40,8 @@ export class KerasObjectDetector implements ObjectDetector {
     }
 
     processImage(path: string): Detections {
-        const process: Process = new PythonProcess(this.pythonScript);
+        const process: Process = new ZeroRPCProcess(this.pythonScript);
+        console.log(path);
         const detection = process.start(path);
         return detection
             .then(result => this.resultToBoundingBoxes(result));
@@ -48,14 +49,14 @@ export class KerasObjectDetector implements ObjectDetector {
 
     private resultToBoundingBoxes(str: string): Detection[] {
         const output: ClassificationOutput = JSON.parse(str);
-        // if (!('bounding_box' in output && 'classification' in output)) throw new OutputMismatchException();
         const detections: Detection[] = [];
         for (let i = 0; i < output.bounding_boxes.length; ++i) {
             const bbox = output.bounding_boxes[i];
             const x1 = bbox[0], x2 = bbox[1], y1 = bbox[2], y2 = bbox[3];
             detections.push({
                 boundingBox: numbersToBoundingBox(x1, x2, y1, y2),
-                classification: new GRTBSClassification(output.classifications[i])
+                classification: new GRTBSClassification(output.classifications[i]),
+                certainty: output.certainties[i]
             });
         }
         return detections;

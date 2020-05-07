@@ -5,14 +5,18 @@ export const argmaxObj = (obj: { [key: number]: number }): number => {
     return max;
 };
 
-export function withTimeMeasure<T>(callback: () => Promise<T>): Promise<T> {
+export interface TimeMeasureResult<T> {
+    result: T;
+    time: number;
+}
+
+export function withTimeMeasure<T>(callback: () => Promise<T>): Promise<TimeMeasureResult<T>> {
     const start = Date.now();
     const res = callback();
-    res.finally(() => {
+    return res.then(result => {
         const end = Date.now();
-        console.log('Process took', end - start, 'ms');
+        return { result, time: end - start };
     });
-    return res;
 }
 
 export class Path {

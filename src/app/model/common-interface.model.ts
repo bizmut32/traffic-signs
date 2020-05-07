@@ -1,14 +1,7 @@
-export interface ClassifiedImage {
-  base64: string;
-}
+import { Detection } from './object-detection/object-detection.model';
 
-export interface ClassificationResult {
-  image: ClassifiedImage;
-  guesses: number[];
+export interface ImageDetection {
+  objects: Detection[];
+  image: { base64: string };
   executionTime: number;
 }
-
-export const signNames: string[] = [
-  '30 km/h',
-  '40 km/h'
-];
