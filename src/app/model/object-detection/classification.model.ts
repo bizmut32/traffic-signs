@@ -1,9 +1,8 @@
 import { labels } from './labels';
 
 export interface ClassificationOutput {
-    bounding_boxes: number[][];
+    objects: number[][];
     classifications: number[];
-    certainties: number[];
 }
 
 export interface Classification {

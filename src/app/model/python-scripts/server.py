@@ -1,6 +1,8 @@
 import os, sys, json
-from full_object_detection import *
+from advanced_object_detection import TrafficSignDetector, loadImage
 import zerorpc
+import numpy as np
+from pandas import datetime
 
 def myconverter(obj):
     if isinstance(obj, np.integer):
@@ -13,11 +15,21 @@ def myconverter(obj):
         return obj.__str__()
 
 class ObjectDetector(object):
+    def __init__(self):
+        modelPath = 'src/assets/models'
+        self.detector = TrafficSignDetector(modelPath)
+
+    # def detect(self, imagePath):
+    #     #imagePath = 'src/assets/testimage.png'
+    #     img = loadImage(imagePath)
+    #     bboxes, labels, certainties = fullPrediction(img)
+    #     result = { 'bounding_boxes': bboxes, 'classifications': labels, 'certainties': certainties }
+    #     return json.dumps(result, default=myconverter)
+
     def detect(self, imagePath):
-        #imagePath = 'src/assets/testimage.png'
         img = loadImage(imagePath)
-        bboxes, labels, certainties = fullPrediction(img)
-        result = { 'bounding_boxes': bboxes, 'classifications': labels, 'certainties': certainties }
+        objects, labels = self.detector.detect(img)
+        result = { 'objects': objects, 'classifications': labels }
         return json.dumps(result, default=myconverter)
 
 class Server:

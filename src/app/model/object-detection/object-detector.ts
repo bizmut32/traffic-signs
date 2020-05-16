@@ -49,13 +49,13 @@ export class KerasObjectDetector implements ObjectDetector {
     private resultToBoundingBoxes(str: string): Detection[] {
         const output: ClassificationOutput = JSON.parse(str);
         const detections: Detection[] = [];
-        for (let i = 0; i < output.bounding_boxes.length; ++i) {
-            const bbox = output.bounding_boxes[i];
-            const x1 = bbox[0], x2 = bbox[1], y1 = bbox[2], y2 = bbox[3];
+        for (let i = 0; i < output.objects.length; ++i) {
+            const bbox = output.objects[i];
+            const x1 = bbox[1], x2 = bbox[2], y1 = bbox[3], y2 = bbox[4];
             detections.push({
                 boundingBox: numbersToBoundingBox(x1, x2, y1, y2),
                 classification: new GRTBSClassification(output.classifications[i]),
-                certainty: output.certainties[i]
+                certainty: bbox[0]
             });
         }
         return detections;
