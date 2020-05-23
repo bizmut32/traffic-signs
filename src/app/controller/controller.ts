@@ -23,7 +23,7 @@ export class Controller {
   }
 
   async classifyRandomImage(): Promise<Response<ImageDetection | null>> {
-    const image = await ImageProcessor.readImageInBase64('assets/testimage3.png');
+    const image = await ImageProcessor.readImageInBase64('assets/testimage.png');
     const pythonScript = Path.pathFromRelativePath('app/model/python-scripts/runnable.py');
     try {
       const objectDetector: ObjectDetector = new KerasObjectDetector(pythonScript);
